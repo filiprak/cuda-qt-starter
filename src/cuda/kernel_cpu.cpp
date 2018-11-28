@@ -173,9 +173,16 @@ void CPUPainter::updatePainted(int mx, int my) {
 
 void CPUPainter::brushTextured(int mx, int my) {
 	qreal maxRadius = brushSettings.size/2;
+
 	//TODO(Konrad): Un-hard-code this
-	static const auto color_image = QImage("textures\\colors.jpg");
-	static const auto height_image = QImage("textures\\RocksDistortion.png");
+#ifdef __linux__
+	static const auto color_image = QImage("textures/stoneColor.png");
+	static const auto height_image = QImage("textures/MountainsAlpha1.png");
+#else
+	static const auto color_image = QImage("textures\\stoneColor.png");
+	static const auto height_image = QImage("textures\\MountainsAlpha1.png");
+#endif
+
 	for (int x=mx - maxRadius + 1 ; x < mx + maxRadius; ++x) {
 		for (int y=my - maxRadius + 1 ; y < my + maxRadius; ++y) {
 			if (!inBounds(x,y))
@@ -197,7 +204,7 @@ void CPUPainter::brushTextured(int mx, int my) {
 
 			const auto height_coords = 
 				get_coords(height_image, x-mx+maxRadius, y-my+maxRadius, maxRadius * 2, maxRadius * 2);
-			const auto height = qRed(height_image.pixel(height_coords.first, height_coords.second)) * 0.001f;
+			const auto height = qRed(height_image.pixel(height_coords.first, height_coords.second)) / 255.0;
 			strength = brushSettings.heightPressure * height * cosine_fallof(radius / maxRadius, brushSettings.falloff);
 			cpuBufferHeight[i] = qBound(-1.0, cpuBufferHeight[i] + strength, 1.0);
 		}
